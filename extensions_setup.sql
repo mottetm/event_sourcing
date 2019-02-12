@@ -1,0 +1,5 @@
+DROP EXTENSION IF EXISTS "pgcrypto";
+CREATE EXTENSION "pgcrypto";
+
+DROP EXTENSION IF EXISTS "uuid-ossp";
+CREATE EXTENSION "uuid-ossp";
