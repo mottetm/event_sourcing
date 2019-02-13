@@ -136,16 +136,17 @@ BEGIN
                     ORDER BY "event"."id" ASC
             );
         ELSE
-        END CASE;
-        CASE WHEN (NEW.data ? 'timestamp') = TRUE THEN
-            INSERT INTO "sourcing"."event" ("event", "type", "uuid", "data", "timestamp") (
-                SELECT "event", "type", "uuid", "data", NEW.timestamp AS "timestamp"
-                    FROM "sourcing"."event"
-                    WHERE "event"."timestamp" <= (NEW.data->>'timestamp')::TIMESTAMP WITHOUT TIME ZONE
-                    ORDER BY "event"."id" ASC
-            );
-        ELSE
-        END CASE;        
+	    CASE WHEN (NEW.data ? 'timestamp') = TRUE THEN
+	        INSERT INTO "sourcing"."event" ("event", "type", "uuid", "data", "timestamp") (
+		    SELECT "event", "type", "uuid", "data", NEW.timestamp AS "timestamp"
+		        FROM "sourcing"."event"
+    		        WHERE "event"."timestamp" <= (NEW.data->>'timestamp')::TIMESTAMP WITHOUT TIME ZONE
+		        ORDER BY "event"."id" ASC
+	        );
+	    ELSE
+		RAISE invalid_parameter_value USING MESSAGE = 'No criterion for the rollback was selected.';
+	    END CASE; 
+        END CASE;       
         INSERT INTO "sourcing"."event" ("event", "data", "timestamp") VALUES ('rollback[end]', NEW.data, NEW.timestamp);
         NEW.event := 'rollback[begin]';
     ELSE
